@@ -4,6 +4,7 @@ import json
 from dotenv import load_dotenv
 import google.generativeai as gen_ai
 from Agents.agent import Agents
+import re
 
 # Load environment variables
 load_dotenv()
@@ -85,7 +86,8 @@ def handle_dynamic_questions():
     if not st.session_state.situation_question:
         try:
             generated_questions = agents.situation_question_generation_agent(st.session_state.user_data)
-            st.session_state.situation_question = json.loads(generated_questions)
+            cleaned_string = re.sub(r"```json|```", "", generated_questions).strip()
+            st.session_state.situation_question = json.loads(cleaned_string)
         except json.JSONDecodeError:
             st.error("Failed to generate dynamic questions.")
             return
@@ -118,7 +120,8 @@ def storytellingquestion():
     if not st.session_state.story_questions:
         try:
             generated_questions = agents.generate_storytelling_questions_agent(st.session_state.user_data)
-            st.session_state.story_questions = json.loads(generated_questions)
+            cleaned_string = re.sub(r"```json|```", "", generated_questions).strip()
+            st.session_state.story_questions = json.loads(cleaned_string)
         except json.JSONDecodeError:
             st.error("Failed to generate dynamic questions.")
             return
@@ -149,10 +152,11 @@ def storytellingquestion():
 def finalize_evaluation():
     try:
         score = agents.evaluate_user(st.session_state.evaluation_data)
+        cleaned_score = re.sub(r"```json|```", "", score).strip()
         print("Eval data", st.session_state.evaluation_data)
         st.markdown("Thank you for your time!")
-        st.json(score)
-        print("Candidate Evaluation Score:", score)
+        st.json(cleaned_score)
+        print("Candidate Evaluation Score:", cleaned_score)
     except Exception as e:
         st.error("An error occurred during evaluation. Please try again.")
         print("Evaluation Error:", e)
