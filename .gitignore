@@ -156,3 +156,8 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Large model files and sensitive data
+saved_models/
+local_user_data.db
+.env
