@@ -1,0 +1,23 @@
+# Backend API
+fastapi
+uvicorn[standard]
+
+# Frontend & Dashboard
+streamlit
+plotly>=5.0.0
+
+# AI & Machine Learning
+google-generativeai
+transformers
+torch
+scikit-learn
+
+# Utilities
+python-dotenv
+cryptography
+pandas
+numpy>=1.20.0
+scikit-learn
+
+# Federated Learning
+flwr[simulation]
