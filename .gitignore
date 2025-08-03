@@ -10,6 +10,7 @@ dist/
 downloads/
 eggs/
 .eggs/
+lib/
 lib64/
 parts/
 sdist/
@@ -19,109 +20,85 @@ wheels/
 .installed.cfg
 *.egg
 
-# Environment variables
+# Environment and secrets
 .env
+.env.*
+!.env.example
+secrets.*
+config.*
 
 # Virtual Environment
 venv/
-env/
 ENV/
+env/
+.venv/
+venv.bak/
 
 # IDE
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-*
 *.swp
 *.swo
 
-# Logs
+# Logs and databases
 *.log
-
-# Database
-*.db
+*.sql
+*.sqlite
 *.sqlite3
+*.db
+local_user_data.db
 
 # Local development
 .DS_Store
+Thumbs.db
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# Model files
+*.pt
+*.pth
+*.h5
+*.ckpt
+*.bin
+*.onnx
+saved_models/
 
-# Local development
-.pytest_cache/
+# Local development files
+local_*.py
+local_*.sh
+*.local
+
+# Testing
 .coverage
 htmlcov/
-
-# Distribution / packaging
-.Python
-build/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-build/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
+.pytest_cache/
 .tox/
 .nox/
-.coverage
-.coverage.*
-.cache
+.cache/
 nosetests.xml
 coverage.xml
 *.cover
 *.py,cover
 .hypothesis/
-.pytest_cache/
 
-# Translations
-*.mo
-*.pot
+# Jupyter notebooks
+*.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+# PyCharm
+*.iml
+*.iws
+*.ipr
+.idea_modules/
 
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# celery beat schedule file
+# Celery
 celerybeat-schedule
+celerybeat.pid
 
-# SageMath parsed files
+# SageMath
 *.sage.py
 
 # Environments
@@ -157,7 +134,11 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# Large model files and sensitive data
-saved_models/
-local_user_data.db
-.env
+# Distribution / packaging
+.Python
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
