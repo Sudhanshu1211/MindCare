@@ -1,0 +1,327 @@
+[
+    {
+        "accuracy": 0.964701,
+        "sensitivity": 0.896407,
+        "specificity": 0.936005,
+        "precision": 0.997308,
+        "f1_score": 0.879297,
+        "auc_roc": 0.965497,
+        "timestamp": "2025-08-15T22:40:00.602603"
+    },
+    {
+        "accuracy": 1.0,
+        "sensitivity": 0.66151,
+        "specificity": 0.998457,
+        "precision": 0.804136,
+        "f1_score": 0.727698,
+        "auc_roc": 0.848299,
+        "timestamp": "2025-08-16T02:01:36.602603"
+    },
+    {
+        "accuracy": 0.761477,
+        "sensitivity": 0.750228,
+        "specificity": 1.0,
+        "precision": 0.902015,
+        "f1_score": 0.874172,
+        "auc_roc": 0.829827,
+        "timestamp": "2025-08-16T05:23:12.602603"
+    },
+    {
+        "accuracy": 0.877947,
+        "sensitivity": 0.83756,
+        "specificity": 0.98361,
+        "precision": 0.798571,
+        "f1_score": 0.970178,
+        "auc_roc": 0.833217,
+        "timestamp": "2025-08-16T08:44:48.602603"
+    },
+    {
+        "accuracy": 1.0,
+        "sensitivity": 0.766544,
+        "specificity": 1.0,
+        "precision": 0.927282,
+        "f1_score": 0.832487,
+        "auc_roc": 0.90606,
+        "timestamp": "2025-08-16T12:06:24.602603"
+    },
+    {
+        "accuracy": 1.0,
+        "sensitivity": 1.0,
+        "specificity": 1.0,
+        "precision": 0.859572,
+        "f1_score": 0.803099,
+        "auc_roc": 1.0,
+        "timestamp": "2025-08-16T15:28:00.602603"
+    },
+    {
+        "accuracy": 1.0,
+        "sensitivity": 0.854124,
+        "specificity": 1.0,
+        "precision": 0.968459,
+        "f1_score": 1.0,
+        "auc_roc": 1.0,
+        "timestamp": "2025-08-16T18:49:36.602603"
+    },
+    {
+        "accuracy": 0.891274,
+        "sensitivity": 1.0,
+        "specificity": 1.0,
+        "precision": 0.986932,
+        "f1_score": 0.943174,
+        "auc_roc": 0.887224,
+        "timestamp": "2025-08-16T22:11:12.602603"
+    },
+    {
+        "accuracy": 0.97274,
+        "sensitivity": 0.994107,
+        "specificity": 0.88399,
+        "precision": 0.826288,
+        "f1_score": 0.85504,
+        "auc_roc": 0.851561,
+        "timestamp": "2025-08-17T01:32:48.602603"
+    },
+    {
+        "accuracy": 1.0,
+        "sensitivity": 0.794386,
+        "specificity": 0.88147,
+        "precision": 0.940236,
+        "f1_score": 0.896381,
+        "auc_roc": 0.88674,
+        "timestamp": "2025-08-17T04:54:24.602603"
+    },
+    {
+        "accuracy": 0.859218,
+        "sensitivity": 0.843328,
+        "specificity": 0.935102,
+        "precision": 0.938046,
+        "f1_score": 0.947739,
+        "auc_roc": 0.918848,
+        "timestamp": "2025-08-17T08:16:00.602603"
+    },
+    {
+        "accuracy": 0.805709,
+        "sensitivity": 1.0,
+        "specificity": 0.921528,
+        "precision": 0.830384,
+        "f1_score": 1.0,
+        "auc_roc": 0.854834,
+        "timestamp": "2025-08-17T11:37:36.602603"
+    },
+    {
+        "accuracy": 1.0,
+        "sensitivity": 0.747448,
+        "specificity": 1.0,
+        "precision": 0.954988,
+        "f1_score": 0.87411,
+        "auc_roc": 1.0,
+        "timestamp": "2025-08-17T14:59:12.602603"
+    },
+    {
+        "accuracy": 0.845476,
+        "sensitivity": 0.861661,
+        "specificity": 0.879956,
+        "precision": 1.0,
+        "f1_score": 0.940581,
+        "auc_roc": 0.975226,
+        "timestamp": "2025-08-17T18:20:48.602603"
+    },
+    {
+        "accuracy": 0.856036,
+        "sensitivity": 0.914713,
+        "specificity": 0.802863,
+        "precision": 0.817677,
+        "f1_score": 0.756159,
+        "auc_roc": 0.998554,
+        "timestamp": "2025-08-17T21:42:24.602603"
+    },
+    {
+        "accuracy": 0.846317,
+        "sensitivity": 0.661795,
+        "specificity": 0.831177,
+        "precision": 0.70011,
+        "f1_score": 0.861737,
+        "auc_roc": 0.919829,
+        "timestamp": "2025-08-18T01:04:00.602603"
+    },
+    {
+        "accuracy": 0.700391,
+        "sensitivity": 0.954971,
+        "specificity": 0.859147,
+        "precision": 0.988149,
+        "f1_score": 0.884275,
+        "auc_roc": 0.928836,
+        "timestamp": "2025-08-18T04:25:36.602603"
+    },
+    {
+        "accuracy": 0.748529,
+        "sensitivity": 0.680257,
+        "specificity": 0.824768,
+        "precision": 0.845622,
+        "f1_score": 0.891626,
+        "auc_roc": 0.749727,
+        "timestamp": "2025-08-18T07:47:12.602603"
+    },
+    {
+        "accuracy": 0.755672,
+        "sensitivity": 0.780534,
+        "specificity": 0.932828,
+        "precision": 0.858086,
+        "f1_score": 0.719539,
+        "auc_roc": 0.817674,
+        "timestamp": "2025-08-18T11:08:48.602603"
+    },
+    {
+        "accuracy": 0.820102,
+        "sensitivity": 0.917739,
+        "specificity": 0.809357,
+        "precision": 0.810548,
+        "f1_score": 0.762196,
+        "auc_roc": 0.928413,
+        "timestamp": "2025-08-18T14:30:24.602603"
+    },
+    {},
+    {
+        "accuracy": 0.995344,
+        "sensitivity": 0.832201,
+        "specificity": 0.973278,
+        "precision": 0.854524,
+        "f1_score": 0.847839,
+        "auc_roc": 0.993419,
+        "timestamp": "2025-08-21T09:42:24.602603"
+    },
+    {
+        "accuracy": 0.991638,
+        "sensitivity": 0.974623,
+        "specificity": 1.0,
+        "precision": 0.932173,
+        "f1_score": 0.856677,
+        "auc_roc": 1.0,
+        "timestamp": "2025-08-21T13:04:00.602603"
+    },
+    {
+        "accuracy": 0.985867,
+        "sensitivity": 0.758606,
+        "specificity": 1.0,
+        "precision": 0.910444,
+        "f1_score": 0.988771,
+        "auc_roc": 0.868667,
+        "timestamp": "2025-08-21T16:25:36.602603"
+    },
+    {
+        "accuracy": 0.786029,
+        "sensitivity": 0.745142,
+        "specificity": 0.953973,
+        "precision": 0.861783,
+        "f1_score": 0.892599,
+        "auc_roc": 1.0,
+        "timestamp": "2025-08-21T19:47:12.602603"
+    },
+    {
+        "accuracy": 0.792074,
+        "sensitivity": 0.835582,
+        "specificity": 0.986693,
+        "precision": 1.0,
+        "f1_score": 0.793369,
+        "auc_roc": 0.863943,
+        "timestamp": "2025-08-21T23:08:48.602603"
+    },
+    {
+        "accuracy": 0.93519,
+        "sensitivity": 0.891665,
+        "specificity": 0.913194,
+        "precision": 0.945038,
+        "f1_score": 0.873714,
+        "auc_roc": 0.825855,
+        "timestamp": "2025-08-22T02:30:24.602603"
+    },
+    {
+        "accuracy": 0.848342,
+        "sensitivity": 1.0,
+        "specificity": 0.865181,
+        "precision": 1.0,
+        "f1_score": 0.945326,
+        "auc_roc": 0.817124,
+        "timestamp": "2025-08-22T05:52:00.602603"
+    },
+    {
+        "accuracy": 0.791023,
+        "sensitivity": 0.920517,
+        "specificity": 0.820771,
+        "precision": 0.815597,
+        "f1_score": 0.972361,
+        "auc_roc": 0.802835,
+        "timestamp": "2025-08-22T09:13:36.602603"
+    },
+    {
+        "accuracy": 0.705232,
+        "sensitivity": 0.821793,
+        "specificity": 0.885151,
+        "precision": 0.683108,
+        "f1_score": 0.875915,
+        "auc_roc": 0.854698,
+        "timestamp": "2025-08-22T12:35:12.602603"
+    },
+    {
+        "accuracy": 0.793254,
+        "sensitivity": 0.93121,
+        "specificity": 0.879608,
+        "precision": 0.882118,
+        "f1_score": 0.675008,
+        "auc_roc": 0.826157,
+        "timestamp": "2025-08-22T15:56:48.602603"
+    },
+    {
+        "accuracy": 0.700327,
+        "sensitivity": 0.816001,
+        "specificity": 0.873029,
+        "precision": 0.807605,
+        "f1_score": 0.891129,
+        "auc_roc": 0.841766,
+        "timestamp": "2025-08-22T19:18:24.602603"
+    },
+    {
+        "accuracy": 0.9807340564322862,
+        "sensitivity": 0.9810139763307937,
+        "specificity": 1.0,
+        "precision": 0.9632933895467459,
+        "f1_score": 1.0,
+        "auc_roc": 0.9868805132173054,
+        "timestamp": "2025-08-22T22:59:05.270612"
+    },
+    {
+        "accuracy": 0.9796775112727867,
+        "sensitivity": 0.9775820718308524,
+        "specificity": 0.9896085421872433,
+        "precision": 0.9694670874870602,
+        "f1_score": 0.9769505715437102,
+        "auc_roc": 1.0,
+        "timestamp": "2025-08-22T23:00:55.485822"
+    },
+    {
+        "accuracy": 0.9796775112727867,
+        "sensitivity": 0.9775820718308524,
+        "specificity": 0.9896085421872433,
+        "precision": 0.9694670874870602,
+        "f1_score": 0.9769505715437102,
+        "auc_roc": 1.0,
+        "timestamp": "2025-08-22T23:00:55.565301"
+    },
+    {
+        "accuracy": 0.9895193035070878,
+        "sensitivity": 1.0,
+        "specificity": 1.0,
+        "precision": 0.9987387529791619,
+        "f1_score": 0.9888201221068966,
+        "auc_roc": 1.0,
+        "timestamp": "2025-08-22T23:03:00.263941"
+    },
+    {
+        "accuracy": 0.9766396886434066,
+        "sensitivity": 0.9616450153895251,
+        "specificity": 1.0,
+        "precision": 0.9680680556446329,
+        "f1_score": 0.9785189635985196,
+        "auc_roc": 1.0,
+        "timestamp": "2025-08-22T23:03:01.355732"
+    }
+]

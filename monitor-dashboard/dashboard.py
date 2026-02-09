@@ -3,22 +3,15 @@ Admin dashboard for monitoring federated learning and risk statistics.
 """
 
 import streamlit as st
-import pandas as pd
-import numpy as np
-import time
-from datetime import datetime, timedelta
-import plotly.express as px
-import plotly.graph_objects as go
-from pathlib import Path
 import json
-import sqlite3
-from typing import Dict, List, Optional, Tuple
+from datetime import datetime
+import pandas as pd
 
-# Page config
 st.set_page_config(
-    page_title="MindCare - FL Monitoring Dashboard",
-    page_icon="📊",
-    layout="wide"
+    page_title="MindCare Dashboard",
+    page_icon="",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 # Custom CSS for better styling
@@ -26,152 +19,108 @@ st.markdown("""
     <style>
     .main-header {font-size:24px !important; font-weight: bold; color: #1f77b4;}
     .sub-header {font-size:20px !important; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px;}
-    .metric-card {padding: 15px; border-radius: 10px; background-color: #f8f9fa; margin: 10px 0;}
-    .stProgress > div > div > div > div {background-color: #1f77b4;}
     </style>
 """, unsafe_allow_html=True)
 
-# Mock data - In a real app, this would come from your database/APIs
+import os
+
+# --- Load Model Metrics ---
 @st.cache_data
-def load_mock_data():
-    # Generate some mock data for demonstration
-    dates = pd.date_range(end=datetime.now(), periods=30).tolist()
-    return {
-        'active_clients': np.random.randint(1, 10, 30).tolist(),
-        'training_rounds': np.random.randint(1, 50, 30).tolist(),
-        'accuracy': np.clip(np.random.normal(0.8, 0.1, 30), 0, 1).tolist(),
-        'loss': np.clip(np.random.normal(0.3, 0.1, 30), 0, 1).tolist(),
-        'dates': dates,
-        'latest_round': {
-            'round': 29,
-            'participants': 8,
-            'avg_accuracy': 0.84,
-            'avg_loss': 0.27,
-            'duration': '2m 15s',
-            'completed_at': (datetime.now() - timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')
-        },
-        'client_metrics': [
-            {'client_id': f'client_{i}', 'accuracy': np.clip(np.random.normal(0.8, 0.1), 0.6, 0.95), 
-             'loss': np.clip(np.random.normal(0.3, 0.1), 0.1, 0.5), 
-             'samples': np.random.randint(100, 1000)}
-            for i in range(1, 9)
-        ]
-    }
-
-def display_overview_metrics(data: Dict):
-    """Display key metrics in a row"""
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Active Clients", f"{data['latest_round']['participants']}", "+2 from last round")
-    with col2:
-        st.metric("Training Round", f"#{data['latest_round']['round']}", "+1")
-    with col3:
-        st.metric("Avg. Accuracy", f"{data['latest_round']['avg_accuracy']:.2%}", "+2.5%")
-    with col4:
-        st.metric("Avg. Loss", f"{data['latest_round']['avg_loss']:.4f}", "-0.012")
-
-def display_training_metrics(data: Dict):
-    """Display training metrics charts"""
-    # Create a DataFrame for plotting
-    df = pd.DataFrame({
-        'Date': data['dates'],
-        'Active Clients': data['active_clients'],
-        'Training Rounds': data['training_rounds'],
-        'Accuracy': data['accuracy'],
-        'Loss': data['loss']
-    })
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("### Model Accuracy Over Time")
-        fig = px.line(df, x='Date', y='Accuracy', 
-                     title="Model Accuracy Trend",
-                     labels={'value': 'Accuracy', 'Date': 'Date'})
-        fig.update_layout(showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-    
-    with col2:
-        st.markdown("### Model Loss Over Time")
-        fig = px.line(df, x='Date', y='Loss', 
-                     title="Model Loss Trend",
-                     labels={'value': 'Loss', 'Date': 'Date'})
-        fig.update_layout(showlegend=False)
-        st.plotly_chart(fig, use_container_width=True)
-
-def display_client_metrics(data: Dict):
-    """Display client-specific metrics"""
-    st.markdown("### Client Performance")
-    client_df = pd.DataFrame(data['client_metrics'])
-    
-    # Sort by accuracy
-    client_df = client_df.sort_values('accuracy', ascending=False)
-    
-    # Create a bar chart for client accuracy
-    fig = px.bar(client_df, 
-                 x='client_id', 
-                 y='accuracy',
-                 title="Client Model Accuracy",
-                 labels={'client_id': 'Client ID', 'accuracy': 'Accuracy'})
-    st.plotly_chart(fig, use_container_width=True)
-
-def display_system_health(data: Dict):
-    """Display system health metrics"""
-    st.markdown("### System Health")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("#### Resource Usage")
-        # Mock resource usage
-        resources = {
-            'CPU': 65,
-            'Memory': 45,
-            'GPU': 30,
-            'Network': 15
-        }
+def load_metrics():
+    """Loads model performance metrics from a JSON file using a robust path."""
+    try:
+        # Construct a reliable path to metrics.json relative to this script's location
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        metrics_file_path = os.path.join(script_dir, "metrics.json")
         
-        for name, value in resources.items():
-            st.markdown(f"**{name}**")
-            st.progress(value / 100)
+        with open(metrics_file_path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        st.error(f"Error: metrics.json not found at the expected location. Please ensure it exists in the 'monitor-dashboard' folder.")
+        return None
+
+def load_metrics_history():
+    """Loads the history of metrics from metrics_history.json."""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    history_file_path = os.path.join(script_dir, "metrics_history.json")
     
-    with col2:
-        st.markdown("#### Latest Round Details")
-        st.json({
-            "Round": data['latest_round']['round'],
-            "Participants": data['latest_round']['participants'],
-            "Avg. Accuracy": f"{data['latest_round']['avg_accuracy']:.2%}",
-            "Avg. Loss": f"{data['latest_round']['avg_loss']:.4f}",
-            "Duration": data['latest_round']['duration'],
-            "Completed At": data['latest_round']['completed_at']
-        })
+    if os.path.exists(history_file_path):
+        with open(history_file_path, 'r') as f:
+            try:
+                history = json.load(f)
+                return history
+            except (json.JSONDecodeError, TypeError):
+                st.warning("Could not read metrics history. File might be empty or corrupt.")
+                return []
+    return []
 
 def main():
-    # Title and header
-    st.title("MindCare - Federated Learning Monitor")
-    st.markdown("---")
-    
-    # Load data
-    data = load_mock_data()
-    
-    # Display metrics
-    display_overview_metrics(data)
-    
-    # Training metrics section
-    st.markdown("## Training Metrics")
-    display_training_metrics(data)
-    
-    # Client metrics section
-    st.markdown("## Client Performance")
-    display_client_metrics(data)
-    
-    # System health section
-    st.markdown("## System Health")
-    display_system_health(data)
-    
-    # Add a refresh button
+    st.title("🧠 MindCare - Federated Model Monitoring")
+    st.markdown("Live dashboard for monitoring the performance of the federated mental health diagnosis model.")
+
+    # --- Accuracy History Chart ---
+    st.subheader("📈 Accuracy Over Time")
+    metrics_history = load_metrics_history()
+
+    if metrics_history:
+        # Convert to pandas DataFrame for easy plotting
+        df_history = pd.DataFrame(metrics_history)
+        df_history['timestamp'] = pd.to_datetime(df_history['timestamp'])
+        df_history = df_history.set_index('timestamp')
+        
+        # Plot only accuracy
+        if 'accuracy' in df_history.columns:
+            st.line_chart(df_history[['accuracy']])
+        else:
+            st.info("No accuracy data found in the history file.")
+    else:
+        st.info("No metrics history found. Run the client multiple times to see a trend.")
+
+    st.markdown("---_---")
+
+    # --- Current Metrics Scorecard ---
+    st.subheader("📊 Current Evaluation Metrics")
+    metrics = load_metrics()
+
+    if metrics:
+        st.markdown('<p class="sub-header">Model Evaluation Metrics</p>', unsafe_allow_html=True)
+
+        # Display metrics in cards
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Accuracy", f"{metrics.get('accuracy', 0):.1%}")
+        with col2:
+            st.metric("F1 Score", f"{metrics.get('f1_score', 0):.3f}")
+        with col3:
+            st.metric("AUC-ROC", f"{metrics.get('auc_roc', 0):.2f}")
+
+        col4, col5, col6 = st.columns(3)
+        with col4:
+            st.metric("Sensitivity (Recall)", f"{metrics.get('sensitivity', 0):.1%}")
+        with col5:
+            st.metric("Precision", f"{metrics.get('precision', 0):.1%}")
+        with col6:
+            st.metric("Specificity", f"{metrics.get('specificity', 0):.1%}")
+
+        st.info("These metrics were calculated on a held-out test dataset to evaluate the model's performance before deployment.")
+
+    # --- Sidebar ---
+    st.sidebar.title("About")
+    st.sidebar.info(
+        "This dashboard provides a static view of the model's offline evaluation metrics. "
+        "For live operational monitoring, please refer to the main Federated Learning Dashboard."
+    )
+    st.sidebar.title("Metric Definitions")
+    st.sidebar.markdown("""
+    - **Accuracy**: Overall correctness of the model.
+    - **Precision**: Of all positive predictions, how many were actually correct.
+    - **Sensitivity (Recall)**: Of all actual positive cases, how many did the model correctly identify.
+    - **F1 Score**: The harmonic mean of Precision and Recall.
+    - **Specificity**: Of all actual negative cases, how many did the model correctly identify.
+    - **AUC-ROC**: The model's ability to distinguish between positive and negative classes.
+    """)
     if st.button("🔄 Refresh Data"):
-        st.experimental_rerun()
+        st.rerun()
     
     # Add a small footer
     st.markdown("---")
