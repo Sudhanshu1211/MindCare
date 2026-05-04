@@ -3,22 +3,39 @@ FastAPI backend for NLP, diagnosis, and encrypted data handling.
 """
 
 import os
+import sys
+# Add project root to Python path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, project_root)
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from typing import List, Dict, Any
-import google.generativeai as genai
 from common.models import Gemini
 
 # Load environment variables from the project root
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+print(f"[DEBUG] Loading .env from: {os.path.abspath(env_path)}")
+load_dotenv(dotenv_path=env_path)
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", "test-key")
 MODEL_PATH = os.getenv("MODEL_PATH", "distilbert-base-uncased")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_MODEL_ID = "models/gemini-2.0-flash"
+print(f"[DEBUG] GEMINI_API_KEY loaded: {'Yes (length: ' + str(len(GEMINI_API_KEY)) + ')' if GEMINI_API_KEY else 'NO - API KEY IS MISSING!'}")
+
+GEMINI_MODEL_ID = os.getenv("GEMINI_MODEL_ID", "gemini-1.5-pro")
+print(f"[DEBUG] GEMINI_MODEL_ID: {GEMINI_MODEL_ID}")
+
+gemini_agent = None
 if GEMINI_API_KEY:
-    gemini_agent = Gemini(api_key=GEMINI_API_KEY, id=GEMINI_MODEL_ID, temprature=0.2)
+    try:
+        gemini_agent = Gemini(api_key=GEMINI_API_KEY, id=GEMINI_MODEL_ID, temperature=0.2)
+        print(f"[DEBUG] Gemini agent initialized successfully")
+    except Exception as e:
+        print(f"[ERROR] Failed to initialize Gemini agent: {e}")
+else:
+    print(f"[WARNING] No GEMINI_API_KEY found - chatbot will use fallback responses")
 
 # Import encryption utilities
 from common.crypto_utils import encrypt_data, decrypt_data
@@ -128,6 +145,10 @@ def ask(request: AskRequest):
     Uses Gemini agent for reply if API key is set, else falls back to template. Sentiment and emotion analysis are performed on the reply.
     User data is encrypted for privacy.
     """
+    # Initialize sentiment early (needed for fallback reply)
+    sentiment = "neutral"
+    emotion = "neutral"
+    
     # Encrypt user message for secure logging/storage
     encrypted_message = encrypt_user_data(request.message)
     print(f"[Security] User message encrypted: {encrypted_message[:20]}...")
@@ -136,9 +157,53 @@ def ask(request: AskRequest):
     encrypted_user_id = encrypt_user_data(request.user_id)
     print(f"[Security] User ID encrypted: {encrypted_user_id[:20]}...")
     
+    # Get user message for analysis
+    user_message = request.message
+    
+    # Sentiment analysis on the USER'S message (before reply generation)
+    if HAS_SENTIMENT and sentiment_pipeline:
+        try:
+            print(f"\n[DEBUG] Analyzing sentiment for user message: {user_message[:100]}...")
+            sentiment_result = sentiment_pipeline(user_message, truncation=True, max_length=512, top_k=None)
+            print(f"[DEBUG] Raw sentiment result: {sentiment_result}")
+            if sentiment_result and isinstance(sentiment_result, list) and len(sentiment_result) > 0:
+                scores = {}
+                for item in sentiment_result:
+                    if isinstance(item, dict):
+                        label = str(item.get('label', '')).lower()
+                        score = float(item.get('score', 0.0))
+                        scores[label] = score
+                if scores:
+                    sentiment = max(scores.items(), key=lambda x: x[1])[0]
+                    confidence = scores[sentiment]
+                    print(f"[Sentiment Analysis] Final sentiment: {sentiment} (confidence: {confidence:.4f})")
+        except Exception as e:
+            import traceback
+            print(f"[Error in sentiment analysis]: {str(e)}")
+            print(f"[Error details]: {traceback.format_exc()}")
+            sentiment = "error"
+    
+    # Emotion analysis on the user's message
+    if HAS_EMOTION and emotion_pipeline:
+        try:
+            print(f"\n[DEBUG] Analyzing emotion for user message: {user_message[:100]}...")
+            emotion_result = emotion_pipeline(user_message, truncation=True, max_length=512, top_k=1)
+            print(f"[DEBUG] Raw emotion result: {emotion_result}")
+            if emotion_result and isinstance(emotion_result, list) and len(emotion_result) > 0:
+                first_emotion = emotion_result[0]
+                if isinstance(first_emotion, dict):
+                    emotion = str(first_emotion.get('label', 'neutral')).lower()
+                    score = float(first_emotion.get('score', 0.0))
+                    print(f"[Emotion Analysis] Detected emotion: {emotion} (confidence: {score:.4f})")
+        except Exception as e:
+            import traceback
+            print(f"[Error in emotion analysis]: {str(e)}")
+            print(f"[Error details]: {traceback.format_exc()}")
+            emotion = "error"
+    
     reply = None
     # Only use Gemini agent for replies
-    if GEMINI_API_KEY:
+    if gemini_agent is not None:
         try:
             gemini_prompt = (
                 "You are a compassionate mental health support chatbot. "
@@ -149,9 +214,15 @@ def ask(request: AskRequest):
             reply = gemini_response.text.strip()
             print(f"[Gemini reply]: {reply}")
         except Exception as e:
-            reply = f"[Gemini error: {e}]"
+            import traceback
+            print(f"[ERROR] Gemini generation failed: {e}")
+            print(f"[ERROR] Traceback: {traceback.format_exc()}")
+            reply = None
+    else:
+        print(f"[WARNING] gemini_agent is None - cannot generate AI response")
+    
     if not reply:
-        reply = f"Thank you for sharing. I understand you feel neutral."
+        reply = f"Thank you for sharing. I understand you feel {sentiment}."
     
     # Encrypt the reply for secure storage/transmission
     encrypted_reply = encrypt_user_data(reply)

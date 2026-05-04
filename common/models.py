@@ -3,7 +3,7 @@ Shared model loading and utility functions (e.g., BERT/DistilBERT).
 """
 
 # Shared model loading logic for Gemini, HuggingFace sentiment, and emotion models
-import google.generativeai as genai
+from google import genai
 import torch
 from typing import Dict, Any, Optional
 from transformers import pipeline
@@ -43,30 +43,66 @@ def get_emotion_pipeline():
     return _emotion_pipeline
 
 class Gemini:
-    def __init__(self, api_key='api_key', id='gemini-2.0-flash', temprature=0.2, **kwargs):
-        self.api_key = api_key
-        self.id = id
-        genai.configure(api_key=self.api_key)
-        self.model = genai.GenerativeModel(
-            self.id,
-            generation_config=genai.GenerationConfig(
-                temperature=temprature,
-                **kwargs
-            )
-        )
-    
-    def generate(self, prompt):
+    """
+    Wrapper class for Google Gemini API using the modern google-genai SDK.
+    Includes retry logic with exponential backoff for rate limiting.
+    """
+    def __init__(self, api_key: str, id: str, temperature: float = 0.2, **kwargs):
+        # Initialize the client with API key using new google-genai SDK
+        self.client = genai.Client(api_key=api_key)
+        self.model_id = id
+        self.temperature = temperature
+        self.max_retries = 3
+        self.initial_retry_delay = 2  # seconds
+        print(f"[Gemini] ✅ Successfully initialized Gemini with model: {self.model_id}")
+
+    def generate(self, prompt: str):
         """
-        Generate content using Gemini model
+        Generate content using Gemini model with retry logic for rate limits.
         
         Args:
-            prompt: The prompt string or object to send to the model
+            prompt: The prompt string to send to the model
             
         Returns:
             GeminiResponse: A wrapper object with the model's response
         """
-        response = self.model.generate_content([prompt])
-        return GeminiResponse(response)
+        import time
+        
+        for attempt in range(self.max_retries):
+            try:
+                print(f"[Gemini] Attempt {attempt + 1}/{self.max_retries}")
+                print(f"[Gemini] Sending prompt to {self.model_id}...")
+                
+                # Use the new google-genai SDK API
+                response = self.client.models.generate_content(
+                    model=self.model_id,
+                    contents=prompt,
+                    config=genai.types.GenerateContentConfig(
+                        temperature=self.temperature,
+                        max_output_tokens=1024
+                    )
+                )
+                
+                print(f"[Gemini] ✅ Response received successfully on attempt {attempt + 1}")
+                return GeminiResponse(response)
+                
+            except Exception as e:
+                error_str = str(e).lower()
+                is_rate_limit = "429" in error_str or "rate" in error_str or "quota" in error_str or "too many" in error_str
+                
+                if is_rate_limit and attempt < self.max_retries - 1:
+                    # Calculate exponential backoff delay
+                    delay = self.initial_retry_delay * (2 ** attempt)
+                    print(f"[Gemini] ⚠️  Rate limit hit (429/TooManyRequests)")
+                    print(f"[Gemini] Retrying in {delay} seconds (attempt {attempt + 1}/{self.max_retries})...")
+                    time.sleep(delay)
+                    continue
+                else:
+                    # Not a rate limit error or max retries reached
+                    print(f"[Gemini] ❌ Error on attempt {attempt + 1}: {str(e)}")
+                    import traceback
+                    print(f"[Gemini] Traceback: {traceback.format_exc()}")
+                    raise
 
 
 class GeminiResponse:
@@ -82,34 +118,97 @@ class GeminiResponse:
             response: The raw response from the Gemini model
         """
         self.raw_response = response
+        print(f"[GeminiResponse] Initializing with response: {type(response)}")
         
     @property
     def text(self) -> str:
         """
-        Get the text content of the response
+        Get the text content of the response.
         
         Returns:
-            The text content as a string
+            The text content as a string.
         """
         try:
-            # Handle different response formats
-            if hasattr(self.raw_response, "text"):
-                return self.raw_response.text
-            elif hasattr(self.raw_response, "parts"):
-                return "".join(part.text for part in self.raw_response.parts)
-            elif hasattr(self.raw_response, "candidates"):
-                candidates = self.raw_response.candidates
-                if candidates and len(candidates) > 0:
-                    parts = candidates[0].content.parts
-                    return "".join(part.text for part in parts)
+            print(f"[GeminiResponse] Attempting to extract text...")
+            print(f"[GeminiResponse] Response type: {type(self.raw_response)}")
+            print(f"[GeminiResponse] Response attributes: {[attr for attr in dir(self.raw_response) if not attr.startswith('_')]}")
             
-            # Fallback: convert to string
-            return str(self.raw_response)
+            # First, try direct text property (most common)
+            if hasattr(self.raw_response, 'text') and self.raw_response.text:
+                text_content = str(self.raw_response.text).strip()
+                if text_content and text_content != "None":
+                    print(f"[GeminiResponse] ✅ Got text from direct .text property")
+                    return text_content
+            
+            # Check if response is blocked by safety filters
+            if hasattr(self.raw_response, 'prompt_feedback'):
+                feedback = self.raw_response.prompt_feedback
+                print(f"[GeminiResponse] Prompt feedback present: {feedback}")
+                if hasattr(feedback, 'block_reason') and feedback.block_reason:
+                    print(f"[WARNING] Response blocked by safety filter: {feedback.block_reason}")
+                    return f"[Content blocked by safety filter: {feedback.block_reason}]"
+            
+            # Check candidates (alternate structure)
+            if hasattr(self.raw_response, 'candidates') and self.raw_response.candidates:
+                print(f"[GeminiResponse] Found {len(self.raw_response.candidates)} candidate(s)")
+                
+                for idx, candidate in enumerate(self.raw_response.candidates):
+                    finish_reason = getattr(candidate, 'finish_reason', 'UNKNOWN')
+                    print(f"[GeminiResponse] Candidate {idx}: finish_reason = {finish_reason}")
+                    
+                    # Check for safety ratings
+                    if hasattr(candidate, 'safety_ratings'):
+                        for rating in candidate.safety_ratings:
+                            print(f"[GeminiResponse] Safety rating: {rating}")
+                    
+                    # Try to extract content
+                    if hasattr(candidate, 'content') and candidate.content:
+                        content = candidate.content
+                        if hasattr(content, 'parts') and content.parts:
+                            texts = []
+                            for part in content.parts:
+                                if hasattr(part, 'text'):
+                                    part_text = str(part.text).strip()
+                                    if part_text and part_text != "None":
+                                        texts.append(part_text)
+                            if texts:
+                                result = "".join(texts)
+                                print(f"[GeminiResponse] ✅ Successfully extracted from candidates: {result[:100]}...")
+                                return result
+            
+            # Fallback: check content property
+            if hasattr(self.raw_response, 'content'):
+                print(f"[GeminiResponse] Response has content property")
+                content = self.raw_response.content
+                if hasattr(content, 'parts'):
+                    texts = []
+                    for part in content.parts:
+                        if hasattr(part, 'text'):
+                            part_text = str(part.text).strip()
+                            if part_text and part_text != "None":
+                                texts.append(part_text)
+                    if texts:
+                        result = "".join(texts)
+                        print(f"[GeminiResponse] ✅ Extracted from content.parts: {result[:100]}...")
+                        return result
+            
+            # Last resort: dump everything for debugging
+            print(f"[GeminiResponse] ❌ Could not extract text from response")
+            print(f"[GeminiResponse] Full response repr: {repr(self.raw_response)[:500]}")
+            print(f"[GeminiResponse] Converting to string...")
+            fallback_text = str(self.raw_response)
+            if fallback_text and fallback_text != "None" and len(fallback_text) > 10:
+                print(f"[GeminiResponse] Using string fallback: {fallback_text[:100]}")
+                return fallback_text
+            
+            return "[Unable to extract response text from Gemini API - please check logs]"
             
         except Exception as e:
-            # Return error message if parsing fails
-            return f"Error extracting text from response: {str(e)}"
-    
+            print(f"[GeminiResponse] ❌ Exception while extracting text: {str(e)}")
+            import traceback
+            print(f"[GeminiResponse] Traceback: {traceback.format_exc()}")
+            return f"[Error extracting response: {str(e)}]"
+
     def to_dict(self) -> Dict[str, Any]:
         """
         Convert the response to a dictionary

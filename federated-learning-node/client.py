@@ -50,9 +50,15 @@ def load_data():
     ]
 
     texts, labels = [], []
-    for row in rows:
+    for idx, row in enumerate(rows):
         try:
-            decrypted_text = decrypt_data(bytes.fromhex(row['encrypted_message']), ENCRYPTION_KEY).decode('utf-8')
+            if not ENCRYPTION_KEY:
+                print(f"[WARNING] ENCRYPTION_KEY not set in .env file")
+                continue
+            
+            hex_string = row['encrypted_message'] if isinstance(row['encrypted_message'], str) else row['encrypted_message'].hex()
+            decrypted_bytes = decrypt_data(bytes.fromhex(hex_string), ENCRYPTION_KEY)
+            decrypted_text = decrypted_bytes.decode('utf-8')
             texts.append(decrypted_text)
             
             # Assign label based on whether the text is in the positive list
@@ -62,9 +68,12 @@ def load_data():
                 labels.append(0)  # 0 for neutral/negative
 
         except Exception as e:
-            print(f"Could not decrypt row: {e}")
+            print(f"[DEBUG Row {idx}] Could not decrypt: {str(e)[:100]}")
     
     if not texts:
+        print(f"[WARNING] No texts could be decrypted. Expected ENCRYPTION_KEY mismatch or empty database.")
+        print(f"[DEBUG] ENCRYPTION_KEY present: {bool(ENCRYPTION_KEY)}")
+        print(f"[DEBUG] Rows fetched: {len(rows)}")
         return None, None, None, None
 
     # Split data into 80% training and 20% validation with varying random state
@@ -136,9 +145,41 @@ class MentalHealthClient(fl.client.NumPyClient):
         self.y_test = y_test
 
     def get_parameters(self, config):
-        return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
+        """Extract and log model parameters being sent to server."""
+        params = [val.cpu().numpy() for _, val in self.model.state_dict().items()]
+        
+        # --- DEBUG: Show what weights are being sent --- #
+        print("\n" + "="*70)
+        print("🚀 SENDING WEIGHTS TO SERVER")
+        print("="*70)
+        print(f"📦 Total weight arrays: {len(params)}")
+        total_params = sum(p.size for p in params)
+        print(f"📊 Total trainable parameters: {total_params:,}")
+        print(f"💾 Approximate size: {total_params * 8 / 1024 / 1024:.2f} MB (8 bytes per float64)")
+        
+        # Show first few and last few weight layers
+        print("\n📋 Weight layers being sent:")
+        layer_names = list(self.model.state_dict().keys())
+        for i, (name, param) in enumerate(zip(layer_names[:5], params[:5])):
+            print(f"  [{i}] {name:50} | shape: {param.shape} | values: min={param.min():.6f}, max={param.max():.6f}, mean={param.mean():.6f}")
+        print(f"  ... ({len(params) - 10} more layers) ...")
+        for i, (name, param) in enumerate(zip(layer_names[-5:], params[-5:]), start=len(params)-5):
+            print(f"  [{i}] {name:50} | shape: {param.shape} | values: min={param.min():.6f}, max={param.max():.6f}, mean={param.mean():.6f}")
+        
+        print("="*70 + "\n")
+        return params
 
     def fit(self, parameters, config):
+        # --- DEBUG: Show server sending weights to client --- #
+        print("\n" + "="*70)
+        print("⬇️  RECEIVING WEIGHTS FROM SERVER FOR LOCAL TRAINING")
+        print("="*70)
+        print(f"📦 Received weight arrays: {len(parameters)}")
+        total_params = sum(p.size for p in parameters)
+        print(f"📊 Total parameters to train: {total_params:,}")
+        print("🔄 Loading weights into local model...")
+        print("="*70 + "\n")
+        
         # Set model parameters from the server
         params_dict = zip(self.model.state_dict().keys(), parameters)
         state_dict = {k: torch.tensor(v) for k, v in params_dict}
@@ -201,12 +242,22 @@ class MentalHealthClient(fl.client.NumPyClient):
                 total += labels.size(0)
 
         accuracy = accuracy_score(all_labels, all_preds)
-        sensitivity = recall_score(all_labels, all_preds)
-        tn, fp, fn, tp = confusion_matrix(all_labels, all_preds).ravel()
+        sensitivity = recall_score(all_labels, all_preds, zero_division=0)
+        
+        # Handle case where confusion matrix might not have all 4 values
+        cm = confusion_matrix(all_labels, all_preds, labels=[0, 1])
+        if cm.size == 4:
+            tn, fp, fn, tp = cm.ravel()
+        else:
+            # Fallback if matrix is still malformed
+            tn = fp = fn = tp = 0
+            if cm.size >= 1:
+                tp = cm[0, 0] if cm.ndim == 2 else cm[0]
+        
         specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
-        precision = precision_score(all_labels, all_preds)
-        f1 = f1_score(all_labels, all_preds)
-        auc_roc = roc_auc_score(all_labels, all_probs) if len(set(all_labels)) > 1 else 0.0
+        precision = precision_score(all_labels, all_preds, zero_division=0)
+        f1 = f1_score(all_labels, all_preds, zero_division=0)
+        auc_roc = roc_auc_score(all_labels, all_probs) if len(set(all_labels)) > 1 else 0.5
         loss = total_loss / len(dataloader)
 
         # Add realistic variation to prevent identical metrics

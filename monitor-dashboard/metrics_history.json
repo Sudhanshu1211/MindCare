@@ -323,5 +323,158 @@
         "f1_score": 0.9785189635985196,
         "auc_roc": 1.0,
         "timestamp": "2025-08-22T23:03:01.355732"
+    },
+    {
+        "accuracy": 0.6952171890096239,
+        "sensitivity": 0.5,
+        "specificity": 0.6909994225190376,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5,
+        "timestamp": "2026-02-17T02:20:41.420891"
+    },
+    {
+        "accuracy": 0.8618838556762907,
+        "sensitivity": 0.5,
+        "specificity": 0.8576660891857043,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5,
+        "timestamp": "2026-02-17T02:20:42.011602"
+    },
+    {
+        "accuracy": 0.6910516387929675,
+        "sensitivity": 0.5,
+        "specificity": 0.6547992440916387,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5,
+        "timestamp": "2026-02-17T02:28:25.163400"
+    },
+    {
+        "accuracy": 0.8294255600999776,
+        "sensitivity": 0.5,
+        "specificity": 0.8463058459075599,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5013691551755022,
+        "timestamp": "2026-02-17T02:29:12.712312"
+    },
+    {
+        "accuracy": 0.9851292324565415,
+        "sensitivity": 0.5,
+        "specificity": 0.9935003535449412,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5063068359845992,
+        "timestamp": "2026-02-17T02:30:14.785154"
+    },
+    {
+        "accuracy": 0.9805111994998974,
+        "sensitivity": 0.5,
+        "specificity": 1.0,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5017051386376787,
+        "timestamp": "2026-02-18T15:55:05.641890"
+    },
+    {
+        "accuracy": 1.0,
+        "sensitivity": 0.5,
+        "specificity": 1.0,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5192802721283292,
+        "timestamp": "2026-02-18T15:55:06.560731"
+    },
+    {
+        "accuracy": 1.0,
+        "sensitivity": 0.5,
+        "specificity": 1.0,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5,
+        "timestamp": "2026-02-18T15:56:03.657678"
+    },
+    {
+        "accuracy": 1.0,
+        "sensitivity": 0.5,
+        "specificity": 0.9829726250011839,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5044724032017245,
+        "timestamp": "2026-02-18T15:56:04.859550"
+    },
+    {
+        "accuracy": 1.0,
+        "sensitivity": 0.5,
+        "specificity": 0.9886295769001605,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5,
+        "timestamp": "2026-02-18T15:57:04.380261"
+    },
+    {
+        "accuracy": 0.9934791230102605,
+        "sensitivity": 0.5,
+        "specificity": 1.0,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5162818542727616,
+        "timestamp": "2026-02-18T15:57:05.085112"
+    },
+    {
+        "accuracy": 0.9855626543518213,
+        "sensitivity": 0.5,
+        "specificity": 1.0,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5021372497198789,
+        "timestamp": "2026-02-23T14:10:25.285698"
+    },
+    {
+        "accuracy": 0.9855626543518213,
+        "sensitivity": 0.5,
+        "specificity": 1.0,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5021372497198789,
+        "timestamp": "2026-02-23T14:10:25.374876"
+    },
+    {
+        "accuracy": 0.975653770581325,
+        "sensitivity": 0.5,
+        "specificity": 1.0,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5173109925358447,
+        "timestamp": "2026-02-23T14:11:46.114869"
+    },
+    {
+        "accuracy": 0.975653770581325,
+        "sensitivity": 0.5,
+        "specificity": 1.0,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5173109925358447,
+        "timestamp": "2026-02-23T14:11:46.137459"
+    },
+    {
+        "accuracy": 1.0,
+        "sensitivity": 0.5,
+        "specificity": 0.9898617326988743,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5,
+        "timestamp": "2026-02-23T14:13:01.492877"
+    },
+    {
+        "accuracy": 1.0,
+        "sensitivity": 0.5,
+        "specificity": 0.9898617326988743,
+        "precision": 0.5,
+        "f1_score": 0.5,
+        "auc_roc": 0.5,
+        "timestamp": "2026-02-23T14:13:01.683060"
     }
 ]

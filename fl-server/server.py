@@ -43,12 +43,35 @@ class ModelPersistenceStrategy(fl.server.strategy.FedAvg):
 
     def aggregate_fit(self, server_round, results, failures):
         """Aggregate fit results and store final parameters."""
+        # --- DEBUG: Show weights received from clients --- #
+        print("\n" + "="*70)
+        print(f"⬆️  ROUND {server_round} - RECEIVING WEIGHTS FROM CLIENTS")
+        print("="*70)
+        print(f"✅ Clients that sent weights: {len(results)}")
+        print(f"❌ Clients that failed: {len(failures)}")
+        
+        if results:
+            print("\n📊 Weights received from each client:")
+            for client_id, (_, fit_res) in enumerate(results):
+                num_examples = fit_res.num_examples
+                metrics = fit_res.metrics
+                print(f"  Client {client_id}: trained on {num_examples} samples, metrics: {metrics}")
+        
         aggregated_parameters, aggregated_metrics = super().aggregate_fit(
             server_round, results, failures
         )
+        
         if aggregated_parameters is not None:
             self.final_parameters = aggregated_parameters
+            # Convert Parameters object to ndarrays before calculating size
+            ndarrays = parameters_to_ndarrays(aggregated_parameters)
+            total_params = sum(p.size for p in ndarrays)
+            print(f"\n🔀 AGGREGATED WEIGHTS")
+            print(f"   Total aggregated parameters: {total_params:,}")
+            print(f"   Using FedAvg (averaging strategy)")
             print(f"[Round {server_round}] Model parameters aggregated and stored.")
+        
+        print("="*70 + "\n")
         return aggregated_parameters, aggregated_metrics
 
     def aggregate_evaluate(self, server_round, results, failures):
@@ -89,12 +112,12 @@ if __name__ == "__main__":
         evaluate_fn=get_evaluate_fn(MODEL_NAME), # Server-side evaluation function
     )
 
-    # Start the Flower server
+    # Start the Flower server (use 127.0.0.1 instead of 0.0.0.0 for Windows compatibility)
     print("Starting Flower server on 127.0.0.1:8080")
     print("Model persistence enabled - final model will be saved after training.")
     
     fl.server.start_server(
-        server_address="0.0.0.0:8080",
+        server_address="127.0.0.1:8080",
         config=fl.server.ServerConfig(num_rounds=3), # Run for 3 rounds of training
         strategy=strategy,
     )
